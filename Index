@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PROSHALE · Materia Prima</title>
+<style>
+  :root{
+    --bg:#EEF0EC;
+    --surface:#FFFFFF;
+    --ink:#1B2126;
+    --ink-muted:#5B6670;
+    --steel:#2C4A63;
+    --steel-dark:#1B3245;
+    --amber:#9C5E22;
+    --amber-bg:#F3E3CE;
+    --border:#D9DCD4;
+    --danger:#A33430;
+    --danger-bg:#F6DEDC;
+    --success:#2E6E4E;
+    --success-bg:#DCEEE2;
+    --radius:10px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);}
+  body{padding-bottom:76px;min-height:100vh;}
+
+  header{
+    background:var(--steel-dark);
+    color:#fff;
+    padding:18px 16px 16px;
+    position:sticky;top:0;z-index:5;
+  }
+  header .brand{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin:0 0 2px;}
+  header h1{font-size:19px;margin:0;font-weight:600;}
+
+  main{padding:16px;max-width:520px;margin:0 auto;}
+  section{display:none;}
+  section.active{display:block;}
+
+  label{display:block;font-size:13px;color:var(--ink-muted);margin:14px 0 6px;}
+  label:first-child{margin-top:0;}
+  input,select,textarea{
+    width:100%;
+    padding:11px 12px;
+    font-size:15px;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    background:var(--surface);
+    color:var(--ink);
+    font-family:var(--sans);
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--steel);outline-offset:1px;}
+
+  button{
+    font-family:var(--sans);
+    font-size:15px;
+    font-weight:600;
+    border:none;
+    border-radius:var(--radius);
+    padding:13px 16px;
+    cursor:pointer;
+  }
+  .btn-primary{background:var(--steel);color:#fff;width:100%;margin-top:18px;}
+  .btn-primary:active{background:var(--steel-dark);}
+  .btn-secondary{background:var(--surface);color:var(--steel);border:1px solid var(--border);}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:10px;
+  }
+
+  .tag{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--steel-dark);
+    color:var(--amber-bg);
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:15px;
+    padding:6px 10px;
+    border-radius:6px;
+    letter-spacing:.03em;
+  }
+  .tag small{font-family:var(--sans);font-weight:500;font-size:10px;letter-spacing:.08em;color:#9FB2C2;text-transform:uppercase;}
+
+  .badge{
+    display:inline-block;
+    font-size:11px;
+    font-weight:600;
+    padding:3px 8px;
+    border-radius:20px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+  .badge.disponible{background:var(--success-bg);color:var(--success);}
+  .badge.agotado{background:var(--danger-bg);color:var(--danger);}
+  .badge.reservado{background:var(--amber-bg);color:var(--amber);}
+
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .stock-meta{font-size:13px;color:var(--ink-muted);margin-top:6px;line-height:1.5;}
+  .stock-cant{font-size:20px;font-weight:700;font-family:var(--mono);}
+
+  .confirm{
+    background:var(--success-bg);
+    border:1px solid var(--success);
+    border-radius:12px;
+    padding:16px;
+    margin-top:16px;
+  }
+  .confirm.error{background:var(--danger-bg);border-color:var(--danger);}
+  .confirm p{margin:4px 0 0;font-size:14px;color:var(--ink);}
+  .confirm .tag{margin-top:6px;}
+
+  .empty{color:var(--ink-muted);font-size:14px;text-align:center;padding:30px 10px;}
+
+  nav.tabbar{
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    display:flex;
+    z-index:10;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  nav.tabbar button{
+    flex:1;
+    background:none;
+    border-radius:0;
+    padding:12px 4px 10px;
+    color:var(--ink-muted);
+    font-size:12px;
+    font-weight:600;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+  }
+  nav.tabbar button.active{color:var(--steel);}
+  nav.tabbar svg{width:20px;height:20px;}
+
+  .searchbar{margin-bottom:12px;}
+  .hint{font-size:12px;color:var(--ink-muted);margin-top:4px;}
+</style>
+</head>
+<body>
+
+<header>
+  <p class="brand">PROSHALE</p>
+  <h1 id="screen-title">Ingreso de material</h1>
+</header>
+
+<main>
+
+  <!-- PANTALLA 1: INGRESO (Logistica) -->
+  <section id="screen-ingreso" class="active">
+    <label for="i-colada">Colada</label>
+    <input id="i-colada" type="text" placeholder="Ej. 4021">
+
+    <label for="i-material">Tipo de material</label>
+    <input id="i-material" type="text" placeholder="Ej. Acero 4140">
+
+    <label for="i-dimension">Dimensión</label>
+    <input id="i-dimension" type="text" placeholder="Ej. Ø50 x 6000 mm">
+
+    <div class="row" style="gap:10px;">
+      <div style="flex:1;">
+        <label for="i-cantidad">Cantidad</label>
+        <input id="i-cantidad" type="number" inputmode="decimal" placeholder="0">
+      </div>
+      <div style="flex:1;">
+        <label for="i-unidad">Unidad</label>
+        <select id="i-unidad">
+          <option value="kg">kg</option>
+          <option value="unidades">unidades</option>
+          <option value="mm">milímetros</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="i-proveedor">Proveedor</label>
+    <input id="i-proveedor" type="text" placeholder="Ej. Acindar">
+
+    <label for="i-remito">N° de remito</label>
+    <input id="i-remito" type="text" placeholder="Ej. 0001-00023456">
+
+    <label for="i-nombre">Registrado por</label>
+    <input id="i-nombre" type="text" placeholder="Tu nombre">
+
+    <button class="btn-primary" onclick="registrarIngreso()">Registrar ingreso</button>
+    <div id="i-resultado"></div>
+  </section>
+
+  <!-- PANTALLA 2: STOCK (Produccion) -->
+  <section id="screen-stock">
+    <input class="searchbar" id="s-buscar" type="text" placeholder="Buscar por código, colada o material" oninput="renderStock()">
+    <div class="row" style="margin-bottom:10px;">
+      <span class="hint" id="s-contador"></span>
+      <button class="btn-secondary" onclick="cargarStock()">Actualizar</button>
+    </div>
+    <div id="s-lista"></div>
+  </section>
+
+  <!-- PANTALLA 3: CORTE -->
+  <section id="screen-corte">
+    <label for="c-material">Material</label>
+    <select id="c-material"></select>
+    <p class="hint" id="c-disponible"></p>
+
+    <label for="c-cortes">Cantidad de cortes</label>
+    <input id="c-cortes" type="number" inputmode="numeric" placeholder="0" oninput="actualizarConsumoCorte()">
+
+    <label for="c-longitud">Longitud</label>
+    <input id="c-longitud" type="number" inputmode="decimal" placeholder="0" oninput="actualizarConsumoCorte()">
+    <p class="hint">Longitud por corte, en la unidad del material.</p>
+
+    <label for="c-piezas">N° Tarjeta</label>
+    <input id="c-piezas" type="text" placeholder="Ej. 1234">
+
+    <label for="c-consumo">Cantidad consumida</label>
+    <input id="c-consumo" type="number" readonly style="background:var(--bg);color:var(--ink-muted);">
+    <p class="hint">Se calcula sola: cortes × longitud.</p>
+
+    <label for="c-nombre">Realizado por</label>
+    <input id="c-nombre" type="text" placeholder="Tu nombre">
+
+    <button class="btn-primary" onclick="registrarCorte()">Descontar stock</button>
+    <div id="c-resultado"></div>
+  </section>
+
+</main>
+
+<nav class="tabbar">
+  <button id="tab-ingreso" class="active" onclick="mostrarPantalla('ingreso')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Ingreso
+  </button>
+  <button id="tab-stock" onclick="mostrarPantalla('stock')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M8 7V5a4 4 0 018 0v2"/></svg>
+    Stock
+  </button>
+  <button id="tab-corte" onclick="mostrarPantalla('corte')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3l12 18M18 3L6 21"/></svg>
+    Corte
+  </button>
+</nav>
+
+<script>
+  // Reemplazar por la URL /exec de tu implementacion de Apps Script
+  var API_URL = 'https://script.google.com/macros/s/AKfycbzdlBWee770PpVLnxcACf4spUG_jhVVGOzodaa9cIjk12PYniU-eSFIBjBrXh-6j0T-/exec';
+
+  var TITULOS = { ingreso: 'Ingreso de material', stock: 'Stock disponible', corte: 'Registro de corte' };
+  var stockCache = [];
+
+  function mostrarPantalla(nombre) {
+    ['ingreso', 'stock', 'corte'].forEach(function (n) {
+      document.getElementById('screen-' + n).classList.toggle('active', n === nombre);
+      document.getElementById('tab-' + n).classList.toggle('active', n === nombre);
+    });
+    document.getElementById('screen-title').textContent = TITULOS[nombre];
+    if (nombre === 'stock') cargarStock();
+    if (nombre === 'corte') cargarStock().then(poblarSelectCorte);
+  }
+
+  function apiGet(action) {
+    return fetch(API_URL + '?action=' + action).then(function (r) { return r.json(); });
+  }
+  function apiPost(payload) {
+    return fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }).then(function (r) { return r.json(); });
+  }
+
+  function cargarStock() {
+    return apiGet('stock').then(function (data) {
+      stockCache = Array.isArray(data) ? data : [];
+      renderStock();
+      return stockCache;
+    }).catch(function (err) {
+      document.getElementById('s-lista').innerHTML = '<div class="empty">No se pudo cargar el stock. Revisá la conexión.</div>';
+    });
+  }
+
+  function renderStock() {
+    var filtro = (document.getElementById('s-buscar').value || '').toLowerCase();
+    var lista = stockCache.filter(function (m) {
+      return !filtro ||
+        String(m.codigo).toLowerCase().includes(filtro) ||
+        String(m.colada).toLowerCase().includes(filtro) ||
+        String(m.tipoMaterial).toLowerCase().includes(filtro);
+    });
+    document.getElementById('s-contador').textContent = lista.length + ' materiales';
+    var html = lista.map(function (m) {
+      var estadoClase = (m.estado || '').toLowerCase();
+      return '' +
+        '<div class="card">' +
+          '<div class="row">' +
+            '<span class="tag"><small>COD</small>' + m.codigo + '</span>' +
+            '<span class="badge ' + estadoClase + '">' + m.estado + '</span>' +
+          '</div>' +
+          '<div class="row" style="margin-top:10px;align-items:flex-end;">' +
+            '<div>' +
+              '<div style="font-weight:600;">' + m.tipoMaterial + '</div>' +
+              '<div class="stock-meta">Colada ' + m.colada + ' · ' + m.dimension + '</div>' +
+            '</div>' +
+            '<div class="stock-cant">' + m.cantidadDisponible + ' <span style="font-size:12px;font-weight:500;color:var(--ink-muted);">' + m.unidad + '</span></div>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+    document.getElementById('s-lista').innerHTML = html || '<div class="empty">No hay materiales que coincidan.</div>';
+  }
+
+  function poblarSelectCorte() {
+    var select = document.getElementById('c-material');
+    var disponibles = stockCache.filter(function (m) { return m.estado !== 'Agotado'; });
+    select.innerHTML = disponibles.map(function (m) {
+      return '<option value="' + m.codigo + '">' + m.codigo + ' · Colada ' + m.colada + ' · ' + m.tipoMaterial + '</option>';
+    }).join('');
+    actualizarDisponibleCorte();
+    select.onchange = actualizarDisponibleCorte;
+  }
+
+  function actualizarDisponibleCorte() {
+    var codigo = document.getElementById('c-material').value;
+    var m = stockCache.find(function (x) { return String(x.codigo) === String(codigo); });
+    document.getElementById('c-disponible').textContent = m ?
+      'Disponible: ' + m.cantidadDisponible + ' ' + m.unidad : '';
+  }
+
+  function actualizarConsumoCorte() {
+    var cortes = Number(document.getElementById('c-cortes').value) || 0;
+    var longitud = Number(document.getElementById('c-longitud').value) || 0;
+    document.getElementById('c-consumo').value = cortes * longitud;
+  }
+
+  function registrarIngreso() {
+    var payload = {
+      action: 'ingreso',
+      colada: document.getElementById('i-colada').value.trim(),
+      tipoMaterial: document.getElementById('i-material').value.trim(),
+      dimension: document.getElementById('i-dimension').value.trim(),
+      cantidad: document.getElementById('i-cantidad').value,
+      unidad: document.getElementById('i-unidad').value,
+      proveedor: document.getElementById('i-proveedor').value.trim(),
+      remito: document.getElementById('i-remito').value.trim(),
+      ingresadoPor: document.getElementById('i-nombre').value.trim()
+    };
+    var resultado = document.getElementById('i-resultado');
+    resultado.innerHTML = '';
+    if (!payload.colada || !payload.tipoMaterial || !payload.cantidad || !payload.proveedor || !payload.remito || !payload.ingresadoPor) {
+      resultado.innerHTML = '<div class="confirm error"><p>Completá todos los campos antes de registrar.</p></div>';
+      return;
+    }
+    apiPost(payload).then(function (res) {
+      if (res.error) {
+        resultado.innerHTML = '<div class="confirm error"><p>' + res.error + '</p></div>';
+        return;
+      }
+      resultado.innerHTML =
+        '<div class="confirm">' +
+          '<span class="tag"><small>Código asignado</small>' + res.codigo + '</span>' +
+          '<p>Ingreso registrado. Rotulá el material físicamente con este código.</p>' +
+        '</div>';
+      ['i-colada','i-material','i-dimension','i-cantidad','i-proveedor','i-remito'].forEach(function(id){
+        document.getElementById(id).value = '';
+      });
+    }).catch(function () {
+      resultado.innerHTML = '<div class="confirm error"><p>Error de conexión. Intentá de nuevo.</p></div>';
+    });
+  }
+
+  function registrarCorte() {
+    var payload = {
+      action: 'corte',
+      codigo: document.getElementById('c-material').value,
+      cantidadCortes: document.getElementById('c-cortes').value,
+      piezasDestino: document.getElementById('c-piezas').value.trim(),
+      cantidadConsumida: document.getElementById('c-consumo').value,
+      realizadoPor: document.getElementById('c-nombre').value.trim()
+    };
+    var resultado = document.getElementById('c-resultado');
+    resultado.innerHTML = '';
+    if (!payload.codigo || !payload.cantidadCortes || !payload.piezasDestino || !payload.cantidadConsumida || !payload.realizadoPor) {
+      resultado.innerHTML = '<div class="confirm error"><p>Completá todos los campos antes de descontar.</p></div>';
+      return;
+    }
+    apiPost(payload).then(function (res) {
+      if (res.error) {
+        resultado.innerHTML = '<div class="confirm error"><p>' + res.error + '</p></div>';
+        return;
+      }
+      var agotadoMsg = res.agotado ? ' Este lote quedó agotado.' : '';
+      resultado.innerHTML =
+        '<div class="confirm' + (res.agotado ? ' error' : '') + '">' +
+          '<span class="tag"><small>Código ' + res.codigo + '</small>Saldo ' + res.saldo + '</span>' +
+          '<p>Descuento aplicado.' + agotadoMsg + '</p>' +
+        '</div>';
+      document.getElementById('c-cortes').value = '';
+      document.getElementById('c-longitud').value = '';
+      document.getElementById('c-piezas').value = '';
+      document.getElementById('c-consumo').value = '';
+      cargarStock().then(poblarSelectCorte);
+    }).catch(function () {
+      resultado.innerHTML = '<div class="confirm error"><p>Error de conexión. Intentá de nuevo.</p></div>';
+    });
+  }
+</script>
+</body>
+</html>
